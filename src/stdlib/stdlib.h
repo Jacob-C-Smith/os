@@ -22,3 +22,13 @@
  * @return a pointer to `size` bytes
  */
 void *alloc ( size_t size );
+
+/// conversions
+/** !
+ * convert ASCII string to integer
+ * 
+ * @param p_string the string
+ * 
+ * @return the integer
+ */
+int atoi ( const char *p_string );

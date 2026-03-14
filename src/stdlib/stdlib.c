@@ -26,3 +26,21 @@ void *alloc ( size_t size )
     // done
     return p_result;
 }
+
+int atoi ( const char *p_string )
+{
+
+    // initialized data
+    int result = 0;
+    int i = 0;
+
+    // iterate through the string
+    while ( p_string[i] >= '0' && p_string[i] <= '9' )
+    {
+        result = result * 10 + p_string[i] - '0';
+        i++;
+    }
+
+    // done
+    return result;
+}
