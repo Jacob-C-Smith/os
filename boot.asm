@@ -4,14 +4,15 @@
 jmp start
 
 start:
-    xor ax, ax
+    xor ax, ax ; ax = 0
 
-    mov ds, ax
-    mov ss, ax
+    mov ds, ax ; ds = 0
+    mov ss, ax ; ss = 0
 
-    mov sp, 0x9c00
+    mov sp, 0x9c00 ; ~8,192 stack
 
-    mov si, msg
+    ; say hi
+    mov si, msg 
     call print
 
     ; load stage 2
@@ -20,28 +21,30 @@ start:
     mov si, dap
     int 0x13
 
+    ; jump to stage 2
     jmp 0x500
 
-    ; jump
+    ; explode
+    cli
     hlt
 
 ; si <- pointer to message
 print:
-    lodsb
-    or al, al 
-    jz .end
-    mov ah, 0xe
+    lodsb       ; al = [si], si++
+    or al, al   ; set zf IF al == 0
+    jz .end     ; done
+    mov ah, 0xe 
     int 0x10
     jmp print
     .end:
         ret
 
 dap:
-    db 0x10
-    db 0x00
-    dw 0x10
-    dd 0x0500
-    dq 0x1
+    db 0x10   ; size
+    db 0x00   ; pad
+    dw 0x10   ; 16 sectors
+    dd 0x0500 ; at 0x500
+    dq 0x1    ; starting at sector 1
 
 msg: db "Hi mom", 0
 
