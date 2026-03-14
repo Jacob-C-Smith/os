@@ -1,5 +1,7 @@
 #pragma once
 
+#define NULL ((void *)0)
+
 typedef unsigned char      u8;
 typedef signed   char      s8;
 typedef char               i8;

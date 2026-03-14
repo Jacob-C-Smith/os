@@ -2,18 +2,21 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Bootloader",
+      "name": "Kernel Debug",
       "type": "cppdbg",
       "request": "launch",
 
-      "program": "${workspaceFolder}/boot.elf",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/os",
 
       "MIMode": "gdb",
       "miDebuggerPath": "/usr/local/bin/gdb",
 
-      "customLaunchSetupCommands": [
-        { "text": "set architecture i8086" },
-        { "text": "target remote localhost:1234" }
+      "preLaunchTask": "Run QEMU",
+
+      "setupCommands": [
+        { "text": "set architecture i386" },
+        { "text": "target remote localhost:1234" },
       ]
     }
   ]
