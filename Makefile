@@ -1,15 +1,11 @@
-.PHONY: build clean image qemu bootloader
+.PHONY: build clean image qemu kernel
 
-bootloader:
-	nasm -f bin boot.asm -o boot.bin
-	nasm -f bin stage2.asm -o stage2.bin
+kernel:
+	nasm -felf32 boot.asm -o build/boot.o
+	i686-elf-gcc -c kernel.c -o build/kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	i686-elf-gcc -T linker.ld -o os -ffreestanding -O2 -nostdlib build/boot.o build/kernel.o -lgcc
 
-image: bootloader
-	dd if=/dev/zero of=os.img bs=512 count=2048
-	dd if=boot.bin of=os.img bs=512 count=1 conv=notrunc
-	dd if=stage2.bin of=os.img bs=512 seek=1 count=16 conv=notrunc
-
-qemu: image
-	qemu-system-i386 -hda os.img
+qemu: 
+	qemu-system-i386 -kernel os -s 
 
 clean:
