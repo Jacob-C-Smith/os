@@ -1,5 +1,5 @@
 [BITS 16]
-[ORG 0x7c00]
+[ORG 0x500]
 
 jmp start
 
@@ -14,15 +14,6 @@ start:
     mov si, msg
     call print
 
-    ; load stage 2
-    mov ah, 0x42
-    mov dl, 0x80
-    mov si, dap
-    int 0x13
-
-    jmp 0x500
-
-    ; jump
     hlt
 
 ; si <- pointer to message
@@ -36,15 +27,7 @@ print:
     .end:
         ret
 
-dap:
-    db 0x10
-    db 0x00
-    dw 0x10
-    dd 0x0500
-    dq 0x1
+msg: db "Stage 2", 0
 
-msg: db "Hi mom", 0
-
-times 510-($-$$) db 0 
-    db 0x55
-    db 0xAA
+times 8188-($-$$) db 0 
+    dd 0xEEEEEEEE
