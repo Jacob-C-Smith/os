@@ -11,9 +11,11 @@
 
 // standard library
 #include <types.h>
+#include <stdlib.h>
 
 // os
 #include <os/interfaces.h>
+#include <os/pack.h>
 
 // enumeration definitions
 enum idt_gate_type_e
@@ -31,8 +33,18 @@ enum idt_privilege_level_e
     IDT_PRIVILEGE3 = (1<<0) | (1<<1),
 };
 
+enum idt_present_e
+{
+    IDT_PRESENT = 1<<7
+};
+
 // structure definitions
-struct idt_descriptor_s;
+struct idt_descriptor_s
+{
+    void *p_offset;
+    u16 selector;
+    u8 type;
+};
 struct idt_s;
 
 // type definitions
@@ -64,9 +76,9 @@ fn_pack idt_descriptor_pack;
 /** !
  * update the interrupt descriptor table register
  * 
- * @param _p_descriptors an array of interrupt descriptor table pointers
- * @param quantity       the quantity of interrupt descriptor table entries
+ * @param p_descriptors interrupt descriptors
+ * @param quantity      the quantity of interrupt descriptor table entries
  * 
  * @return 1 on success, 0 on error
  */
-int idt_set ( idt_descriptor *_p_descriptors[], int quantity );
+int idt_set ( idt_descriptor *p_descriptors, int quantity );

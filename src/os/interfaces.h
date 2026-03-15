@@ -11,5 +11,8 @@
 
 // type definitions
 /// reflection
-typedef int    (fn_pack)   ( void *p_buffer, const void *const  p_value );
-typedef int    (fn_unpack) ( void *p_value , void              *p_buffer );
+typedef int (fn_pack)   ( void *p_buffer, const void *const  p_value );
+typedef int (fn_unpack) ( void *p_value , void              *p_buffer );
+
+/// interrupt service routine
+typedef void (fn_isr) ( void );
