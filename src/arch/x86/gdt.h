@@ -1,82 +1,75 @@
-/** !
- * global descriptor table interface
- * 
- * @file src/arch/x86/gdt.h
- * 
- * @author Jacob Smith
- */
+#ifndef _GDT_H_
+#define _GDT_H_
 
-// header guard
-#pragma once
+#include <stdint.h>
 
-// standard library
-#include <types.h>
+typedef uint64_t gdt_segdesc_t;
 
-// os
-#include <os/interfaces.h>
+struct gdt_segdesc {
+    uint32_t base : 32;
+    uint32_t limit : 20;
 
-// enumeration definitions
-enum gdt_access_e
-{
-    GDT_ACCESS_ACCESSED   = 1<<0,
-    GDT_ACCESS_READWRITE  = 1<<1,
-    GDT_ACCESS_GROWDOWN   = 1<<2,
-    GDT_ACCESS_CONFORMING = 1<<2,
-    GDT_ACCESS_EXECUTABLE = 1<<3,
-    GDT_ACCESS_CODEDATA   = 1<<4,
-    GDT_ACCESS_PRIVILEGE0 = 0,
-    GDT_ACCESS_PRIVILEGE1 = 1<<5,
-    GDT_ACCESS_PRIVILEGE2 = 1<<6,
-    GDT_ACCESS_PRIVILEGE3 = (1<<5) | (1<<6),
-    GDT_ACCESS_PRESENT    = 1<<7,
+    uint32_t privilege_level : 2;
+    bool executable;
+    bool task_seg;
+    bool size_flag;
+    bool granularity;
 };
 
-enum gdt_flags_e
+[[maybe_unused]]
+static inline gdt_segdesc_t gdt_segdesc_init(const struct gdt_segdesc desc)
 {
-    GDT_FLAGS_BYTE_GRANULARITY = 0,
-    GDT_FLAGS_PAGE_GRANULARITY = 1<<3,
-};
+    return (union {
+        // Broken into the fields
+        struct {
+            uint64_t limit15_0 : 16;
+            uint64_t base23_0 : 24;
 
-// structure definitions
-struct gdt_descriptor_s;
-struct gdt_s;
+            // Access field
+            uint64_t reserved0 : 1;
+            uint64_t rw : 1;
+            uint64_t dc : 1;
+            uint64_t e : 1;
+            uint64_t s : 1;
+            uint64_t dpl : 2;
+            uint64_t p : 1;
 
-// type definitions
-typedef struct gdt_descriptor_s gdt_descriptor;
-typedef struct gdt_s gdt;
+            uint64_t limit19_16 : 4;
 
-// function definitions
-/// constructors
-/** !
- * Construct a global descriptor table entry
- * 
- * @param p_gdt_descriptor result
- * @param p_base           the base address of the entry
- * @param p_limit          the upper limit of the entry
- * @param access           the access byte
- * @param flags            the flags 
- * 
- * @return 1 on success, 0 on error
- */
-int gdt_descriptor_construct 
-(
-    gdt_descriptor *p_gdt_descriptor,
-    void           *p_base,
-    void           *p_limit, 
-    u8             access,
-    u8             flags
-);
+            // Flags field
+            uint64_t reserved1 : 2;
+            uint64_t db : 1;
+            uint64_t g : 1;
 
-/// pack
-fn_pack gdt_descriptor_pack;
+            uint64_t base31_24 : 8;
+        } fields;
 
-/// set
-/** !
- * update the global descriptor table register
- * 
- * @param _p_descriptors an array of global descriptor table pointers
- * @param quantity       the quantity of global descriptor table entries
- * 
- * @return 1 on success, 0 on error
- */
-int gdt_set ( gdt_descriptor *_p_descriptors[], int quantity );
+        // The raw 64bit value
+        gdt_segdesc_t value;
+    }) {
+        .fields = {
+            .limit15_0 = desc.limit,
+            .base23_0 = desc.base,
+            .e = desc.executable,
+            .s = desc.task_seg,
+            .dpl = desc.privilege_level,
+            .p = true,
+            .limit19_16 = desc.limit >> 16,
+            .db = desc.size_flag,
+            .g = desc.granularity,
+            .base31_24 = desc.base >> 24,
+        },
+    }
+        .value;
+}
+
+[[maybe_unused]]
+static inline void gdt_load(const uint16_t len,
+    const gdt_segdesc_t descs[static const len])
+{
+    static uint64_t gdtr;
+    gdtr = ((uintptr_t)descs << 16) + len;
+    __asm__ volatile("lgdt (%[ptr])" : : [ptr] "X"(&gdtr));
+}
+
+#endif

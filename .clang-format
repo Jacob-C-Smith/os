@@ -1,0 +1,3 @@
+BasedOnStyle: WebKit
+Language: Cpp
+PointerAlignment: Right
