@@ -3,8 +3,9 @@
 kernel:
 	touch os
 	rm os
-	nasm -felf32 src/arch/x86/boot.asm -o build/boot.o
-	nasm -felf32 src/arch/x86/idt.asm -o build/idta.o
+	nasm -g -felf32 src/arch/x86/boot.asm -o build/boot.o
+	nasm -g -felf32 src/arch/x86/idt.asm -o build/idta.o
+	nasm -g -felf32 src/arch/x86/isr.asm -o build/isra.o
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/vga.c -o build/vga.o -std=c23 -ffreestanding -O0 -Wall -Wextra
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/idt.c -o build/idt.o -std=c23 -ffreestanding -O0 -Wall -Wextra
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/isr.c -o build/isr.o -std=c23 -ffreestanding -O0 -Wall -Wextra
@@ -17,6 +18,7 @@ kernel:
 	i686-elf-gcc -g -T linker.ld -o os -ffreestanding -O0 -nostdlib \
 	build/boot.o \
 	build/idta.o \
+	build/isra.o \
 	build/vga.o \
 	build/idt.o \
 	build/isr.o \

@@ -7,18 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-void explode ( void )
-{
-	terminal_writestring("BOOM!\n");
-	while (1);
-}
-
-void divide_by_zero ( void )
-{
-	terminal_writestring("you can't divide by zero!\n");
-	while (1);
-}
-
 void kernel_early ( void )
 {
 
@@ -26,10 +14,12 @@ void kernel_early ( void )
 	terminal_initialize();
 
 	// TODO: set up the GDT
+	
 	// set up ISR's
 	isr_initialize();
     terminal_writestring("Initialized IDT\n");
 
+	// - set up PCI
 	// - set up PIC
 	// - set up PIT
 	// - set up keyboard
@@ -47,6 +37,4 @@ void kernel_main ( void )
 	// hello
     terminal_writestring("Kernel\n");
 
-	// force a fault
-	int x = 1 / 0;
 }

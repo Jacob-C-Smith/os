@@ -10,10 +10,15 @@
 #include <arch/x86/isr.h>
 
 // data
-fn_isr *_interrupt_service_routines[256] = 
+fn_isr *_isr_handlers[256] = 
 {
     [ISR_DIVIDE_ERROR] = isr_divide_error, 
-    [128]              = isr_80h,
+    
+};
+
+fn_isr *_isr_wrappers[256] = 
+{
+    [ISR_DIVIDE_ERROR] = isr_fault_divide_by_zero, 
 };
 
 int isr_initialize ( void ) 
@@ -26,7 +31,7 @@ int isr_initialize ( void )
     for (size_t i = 0; i < 256; i++)
         idt_descriptor_construct(
             &_idt_descriptors[i],
-            _interrupt_service_routines[i] ? _interrupt_service_routines[i] : isr_default, 
+            _isr_wrappers[i] ? _isr_wrappers[i] : isr_default, 
             1<<3,
             IDT_GATE_INTERRUPT | IDT_PRIVILEGE0 | IDT_PRESENT
         );
