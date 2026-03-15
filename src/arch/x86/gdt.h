@@ -39,11 +39,9 @@ enum gdt_flags_e
 
 // structure definitions
 struct gdt_descriptor_s;
-struct gdt_s;
 
 // type definitions
 typedef struct gdt_descriptor_s gdt_descriptor;
-typedef struct gdt_s gdt;
 
 // function definitions
 /// constructors
