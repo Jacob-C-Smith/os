@@ -1,7 +1,12 @@
+// header guard
 #pragma once
 
+// preprocessor definitions
 #define NULL ((void *)0)
 
+// type definitions
+/// integer
+typedef void               u0;
 typedef unsigned char      u8;
 typedef signed   char      s8;
 typedef char               i8;
@@ -14,7 +19,8 @@ typedef          int       i32;
 typedef unsigned long long u64;
 typedef signed   long long s64;
 typedef          long long i64;
-typedef unsigned size_t;
+typedef unsigned           size_t;
 
+/// floating point
 typedef float  f32;
 typedef double f64;
