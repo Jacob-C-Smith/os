@@ -1,6 +1,7 @@
 //!
 //! Initial entry point of the kernel
 //!
+const std = @import("std");
 const image_header = @import("image_header.zig");
 
 /// Extern kernel function and linker defined symbols
@@ -20,6 +21,44 @@ pub export const _image_header linksection(".multiboot") = generate_header: {
     const final = header_buffer;
     break :generate_header final;
 };
+
+/// Helper to load idt
+pub export fn idt_load(addr: *allowzero anyopaque) callconv(.c) void {
+    asm volatile ("lidtl (%[ptr])"
+        :
+        : [ptr] "X" (addr),
+    );
+}
+
+/// Interrupt service routines
+const isr = struct {
+    const Fn = fn () callconv(.c) void;
+    pub extern var _isr_handlers: [*]volatile *const Fn;
+
+    fn link(comptime name: []const u8, comptime to: u8) void {
+        @export(&(struct {
+            fn func() callconv(.naked) void {
+                asm volatile (
+                    \\ pushal
+                    \\ cld
+                    \\ calll 0(%[ptr])
+                    \\ popal
+                    \\ iret
+                    :
+                    : [ptr] "r" (_isr_handlers[to]),
+                );
+            }
+        }.func), .{
+            .name = std.fmt.comptimePrint("isr_fault_{s}", .{name}),
+            .visibility = .default,
+            .section = ".text",
+        });
+    }
+};
+
+comptime {
+    isr.link("divide_by_zero", 0);
+}
 
 /// The linker script specifies _start as the entry point to the kernel and the
 /// bootloader will jump to this position once the kernel has been loaded. It
