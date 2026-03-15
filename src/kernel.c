@@ -7,6 +7,16 @@
 
 void kernel_early ( void )
 {
+	// TODO:
+	// - set up the GDT
+	// - set up the IDT
+	// - set up ISR's
+	// - set up PIC
+	// - set up PIT
+	// - set up keyboard
+	// - set up mouse
+	// - set up IDE
+
 	terminal_initialize();
 }
 

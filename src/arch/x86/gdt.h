@@ -2,6 +2,8 @@
  * global descriptor table interface
  * 
  * @file src/arch/x86/gdt.h
+ * 
+ * @author Jacob Smith
  */
 
 // header guard
