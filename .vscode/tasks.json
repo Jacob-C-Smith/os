@@ -11,7 +11,7 @@
     {
       "label": "Run QEMU",
       "type": "shell",
-      "command": "qemu-system-i386 -kernel os -s -S",
+      "command": "qemu-system-i386 -kernel os -s -S -monitor stdio -d in_asm,int,guest_errors,nochain,cpu_reset -D qemu.log",
       "problemMatcher": [],
       "isBackground": true,
       "presentation": {
