@@ -2,4 +2,4 @@ os.img
 stage2.bin
 boot.bin
 build/*.o
-os
+./os
