@@ -28,7 +28,7 @@ void kernel_early ( void )
 
 }
 
-void kernel_main ( void ) 
+extern void kernel_main ( void ) 
 {
 
 	// early

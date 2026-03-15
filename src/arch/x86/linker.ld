@@ -43,7 +43,16 @@ SECTIONS
 	/* Read-write data (uninitialized) and stack */
 	.bss BLOCK(4K) : ALIGN(4K)
 	{
+		/* Common */
 		*(COMMON)
+
+		/* Insert the stack */
+		. = ALIGN(16)
+		stack_bottom = .
+		. += 16k
+		stack_top = .
+
+		/* Other BSS defines */
 		*(.bss)
 	}
 
