@@ -15,8 +15,6 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
 
         .sanitize_c = .off,
-        .sanitize_thread = false,
-        .stack_check = false,
     });
     boot_mod.addIncludePath(b.path("include/"));
 

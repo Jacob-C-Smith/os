@@ -7,14 +7,107 @@ const target_endian = builtin.cpu.arch.endian();
 
 /// Image header
 pub const ImageHeader = union(enum) {
+    multiboot: MultiBoot,
     multiboot2: multiboot2.Config,
 
     /// Generates the bytes for the header
     pub fn generate(this: @This()) []const u8 {
         return switch (this) {
+            .multiboot => |x| x.generate(),
             .multiboot2 => |x| x.generate(),
         };
     }
+};
+
+/// Multiboot compliant header
+pub const MultiBoot = struct {
+    page_aligned: bool,
+    include_mem_info: bool,
+    recommended_video_mode: ?VideoMode = null,
+    address_fields: ?AddrFields = null,
+
+    pub fn generate(comptime this: @This()) []const u8 {
+        // Generate the header
+        var header = Header{ .flags = .{
+            .alignment = this.page_aligned,
+            .mem_info = this.include_mem_info,
+            .video_mode = this.recommended_video_mode != null,
+            .addr_fields = this.address_fields != null,
+        } };
+        if (this.recommended_video_mode) |vm| {
+            switch (vm.mode_type) {
+                .linear => |x| {
+                    header.mode_type = 0;
+                    header.depth = x orelse 0;
+                },
+                .text => {
+                    header.mode_type = 1;
+                },
+            }
+        }
+        if (this.address_fields) |addrs| {
+            inline for (std.meta.fieldNames(AddrFields)) |field| {
+                @field(header, field) = @intFromPtr(@field(addrs, field));
+            }
+        }
+        header.checksum = header.magic +% @as(u32, @bitCast(header.flags));
+        header.checksum = @bitCast(-@as(i32, @bitCast(header.checksum)));
+
+        // Get the raw header data
+        var buffer: [@sizeOf(Header)]u8 = undefined;
+        var writer = std.io.Writer.fixed(&buffer);
+        writer.writeStruct(header, target_endian) catch unreachable;
+        const final = buffer;
+        return &final;
+    }
+
+    /// Recommended video mode settings
+    pub const VideoMode = struct {
+        mode_type: ModeType,
+        width: ?u32,
+        height: ?u32,
+
+        /// Video mode type
+        pub const ModeType = union(enum) {
+            /// Specifies the recommended bits per pixel (depth)
+            linear: ?u8,
+            text: void,
+        };
+    };
+
+    /// Multiboot header address fields
+    pub const AddrFields = struct {
+        header_addr: *allowzero anyopaque,
+        load_addr: *allowzero anyopaque,
+        load_end_addr: *allowzero anyopaque,
+        bss_end_addr: *allowzero anyopaque,
+        entry_addr: *allowzero anyopaque,
+    };
+
+    const Header = extern struct {
+        magic: u32 = 0x1badb002,
+        flags: Flags,
+        checksum: u32 = 0,
+        header_addr: u32 = 0,
+        load_addr: u32 = 0,
+        load_end_addr: u32 = 0,
+        bss_end_addr: u32 = 0,
+        entry_addr: u32 = 0,
+        mode_type: u32 = 0,
+        width: u32 = 0,
+        height: u32 = 0,
+        depth: u32 = 0,
+
+        /// Raw header flags
+        const Flags = packed struct(u32) {
+            alignment: bool,
+            mem_info: bool,
+            video_mode: bool,
+            reserved0: u13 = 0,
+            addr_fields: bool,
+            reserved1: u15 = 0,
+        };
+    };
 };
 
 /// Mulitboot2 compliant header

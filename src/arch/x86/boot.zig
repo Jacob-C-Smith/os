@@ -10,7 +10,10 @@ pub extern const stack_top: *allowzero anyopaque;
 /// Image Header
 pub export const _image_header linksection(".multiboot") = generate_header: {
     const header_data = image_header.ImageHeader.generate(
-        .{ .multiboot2 = .{ .tags = &.{} } },
+        .{ .multiboot = .{
+            .page_aligned = true,
+            .include_mem_info = true,
+        } },
     );
     var header_buffer: [header_data.len]u8 = undefined;
     @memcpy(&header_buffer, header_data);
@@ -55,7 +58,7 @@ pub export fn _start() callconv(.naked) noreturn {
     // preserved and the call is well defined.
     // note, that if you are building on Windows, C functions may have "_" prefix in assembly: _kernel_main
     asm volatile (
-        \\ movl stack_top, %esp
+        \\ movl $stack_top, %esp
         \\ call kernel_main
     );
 
