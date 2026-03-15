@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 // data
-unsigned char *p_pool = (void *)0x200000;
+unsigned char *p_pool = (void *)(1024*1024*3);
 size_t used = 0;
 
 // function definitions
