@@ -18,7 +18,8 @@ fn_isr *_isr_handlers[256] =
 
 fn_isr *_isr_wrappers[256] = 
 {
-    [ISR_DIVIDE_ERROR] = isr_fault_divide_by_zero, 
+    [ISR_DIVIDE_ERROR] = isr_fault_default
+    // [ISR_DIVIDE_ERROR] = isr_fault_divide_by_zero, isr_fault_default
 };
 
 int isr_initialize ( void ) 
@@ -43,6 +44,10 @@ int isr_initialize ( void )
     return 1;
 }
 
-void isr_default ( void ) { terminal_writestring("default ISR\n"); }
+void isr_default ( void )
+{
+    terminal_printf("PANIC!");
+    while(1);
+}
 void isr_divide_error ( void ) { terminal_writestring("divide by zero ISR\n"); }
 void isr_80h ( void ) { terminal_writestring("INT 0x80\n"); }

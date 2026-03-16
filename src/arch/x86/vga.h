@@ -1,11 +1,18 @@
+// header guard
 #pragma once
 
+// standard library
 #include <types.h>
 
+// os
+#include <os/terminal.h>
+
+// preprocessor definitions
 #define VGA_WIDTH   80
 #define VGA_HEIGHT  25
 #define VGA_MEMORY  0xB8000 
 
+// enumeration definitions
 enum vga_color 
 {
 	VGA_COLOR_BLACK = 0,
@@ -29,3 +36,4 @@ enum vga_color
 u8 vga_entry_color(enum vga_color fg, enum vga_color bg);
 
 u16 vga_entry(u8 uc, u8 color);
+

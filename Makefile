@@ -6,6 +6,7 @@ kernel:
 	nasm -g -felf32 src/arch/x86/boot.asm -o build/boot.o
 	nasm -g -felf32 src/arch/x86/idt.asm -o build/idta.o
 	nasm -g -felf32 src/arch/x86/isr.asm -o build/isra.o
+	nasm -g -felf32 src/arch/x86/io.asm -o build/ioa.o
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/vga.c -o build/vga.o -std=c23 -ffreestanding -O0 -Wall -Wextra
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/idt.c -o build/idt.o -std=c23 -ffreestanding -O0 -Wall -Wextra
 	i686-elf-gcc -g -Iinclude -c src/arch/x86/isr.c -o build/isr.o -std=c23 -ffreestanding -O0 -Wall -Wextra
@@ -19,6 +20,7 @@ kernel:
 	build/boot.o \
 	build/idta.o \
 	build/isra.o \
+	build/ioa.o \
 	build/vga.o \
 	build/idt.o \
 	build/isr.o \

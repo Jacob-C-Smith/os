@@ -53,3 +53,4 @@ fn_isr isr_default;
 fn_isr isr_fault_divide_by_zero;
 fn_isr isr_divide_error;
 fn_isr isr_80h;
+fn_isr isr_fault_default;
