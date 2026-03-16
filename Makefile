@@ -29,8 +29,8 @@ kernel:
 	build/ctype.o \
 	build/kernel.o
 
-qemu: 
-	qemu-system-i386 -kernel os -s 
-
+qemu:
+	/bin/sh ./run_qemu.sh
+	
 clean:
 	rm os build/*.o
