@@ -15,7 +15,7 @@ void kernel_early ( void )
 	terminal_initialize();
 
 	// TODO: set up the GDT
-	gdt_load(1, (const gdt_segdesc_t []){
+	gdt_load(3, (const gdt_segdesc_t []){
 	         	gdt_segdesc_init((struct gdt_segdesc){}),
 	         	gdt_segdesc_init(((struct gdt_segdesc){
 	         	                 	.base = 0x0040'0000,

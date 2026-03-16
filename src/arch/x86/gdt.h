@@ -31,7 +31,7 @@ static inline void gdt_load(const uint16_t len,
     const gdt_segdesc_t descs[static const len])
 {
     static uint64_t gdtr;
-    gdtr = ((uintptr_t)descs << 16) + len;
+    gdtr = ((uint64_t)(uintptr_t)descs << 16) + (len * sizeof(gdt_segdesc_t));
     __asm__ volatile("lgdt (%[ptr])" : : [ptr] "m"(gdtr));
 }
 
