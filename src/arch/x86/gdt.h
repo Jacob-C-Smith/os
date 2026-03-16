@@ -10,58 +10,21 @@ struct gdt_segdesc {
     uint32_t limit : 20;
 
     uint32_t privilege_level : 2;
+    bool read_write;
     bool executable;
-    bool task_seg;
+    bool not_task_seg;
+    bool present;
     bool size_flag;
     bool granularity;
 };
 
-[[maybe_unused]]
-static inline gdt_segdesc_t gdt_segdesc_init(const struct gdt_segdesc desc)
-{
-    return (union {
-        // Broken into the fields
-        struct {
-            uint64_t limit15_0 : 16;
-            uint64_t base23_0 : 24;
-
-            // Access field
-            uint64_t reserved0 : 1;
-            uint64_t rw : 1;
-            uint64_t dc : 1;
-            uint64_t e : 1;
-            uint64_t s : 1;
-            uint64_t dpl : 2;
-            uint64_t p : 1;
-
-            uint64_t limit19_16 : 4;
-
-            // Flags field
-            uint64_t reserved1 : 2;
-            uint64_t db : 1;
-            uint64_t g : 1;
-
-            uint64_t base31_24 : 8;
-        } fields;
-
-        // The raw 64bit value
-        gdt_segdesc_t value;
-    }) {
-        .fields = {
-            .limit15_0 = desc.limit,
-            .base23_0 = desc.base,
-            .e = desc.executable,
-            .s = desc.task_seg,
-            .dpl = desc.privilege_level,
-            .p = true,
-            .limit19_16 = desc.limit >> 16,
-            .db = desc.size_flag,
-            .g = desc.granularity,
-            .base31_24 = desc.base >> 24,
-        },
-    }
-        .value;
-}
+#define _gdt_segdesc_f(desc, field) ((uint64_t)(desc).field)
+#define gdt_segdesc_init(d)                                                                                                                                                                                           \
+    (gdt_segdesc_t)(                                                                                                                                                                                                  \
+        ((_gdt_segdesc_f(d, limit) & 0xffff) | (_gdt_segdesc_f(d, limit) >> 16 << 48))                                                                                                                                \
+        | (((_gdt_segdesc_f(d, base) & 0xffffff) << 16) | ((_gdt_segdesc_f(d, base) & 0xff000000) << 32))                                                                                                             \
+        | ((_gdt_segdesc_f(d, read_write) << 41) | (_gdt_segdesc_f(d, executable) << 43) | (_gdt_segdesc_f(d, not_task_seg) << 44) | (_gdt_segdesc_f(d, privilege_level) << 45) | (_gdt_segdesc_f(d, present) << 47)) \
+        | ((_gdt_segdesc_f(d, size_flag) << 54) | (_gdt_segdesc_f(d, granularity) << 55)))
 
 [[maybe_unused]]
 static inline void gdt_load(const uint16_t len,
@@ -69,7 +32,7 @@ static inline void gdt_load(const uint16_t len,
 {
     static uint64_t gdtr;
     gdtr = ((uintptr_t)descs << 16) + len;
-    __asm__ volatile("lgdt (%[ptr])" : : [ptr] "X"(&gdtr));
+    __asm__ volatile("lgdt (%[ptr])" : : [ptr] "m"(gdtr));
 }
 
 #endif

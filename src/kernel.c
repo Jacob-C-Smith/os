@@ -1,3 +1,4 @@
+#include "arch/x86/gdt.h"
 #include <types.h>
 #include <arch/x86/vga.h>
 #include <arch/x86/idt.h>
@@ -14,6 +15,33 @@ void kernel_early ( void )
 	terminal_initialize();
 
 	// TODO: set up the GDT
+	gdt_load(1, (const gdt_segdesc_t []){
+	         	gdt_segdesc_init((struct gdt_segdesc){}),
+	         	gdt_segdesc_init(((struct gdt_segdesc){
+	         	                 	.base = 0x0040'0000,
+	         	                 	.limit = 0x3ff,
+
+								    .privilege_level = 0,
+								    .executable = true,
+								    .read_write = true,
+								    .present = true,
+								    .not_task_seg = true,
+								    .size_flag = true,
+								    .granularity = true,
+	         	                 })),
+	         	gdt_segdesc_init(((struct gdt_segdesc){
+	         	                 	.base = 0x0080'0000,
+	         	                 	.limit = 0x3ff,
+
+								    .privilege_level = 0,
+								    .executable = false,
+								    .read_write = true,
+								    .present = true,
+								    .not_task_seg = true,
+								    .size_flag = true,
+								    .granularity = true,
+	         	                 	})),
+	         });
 	
 	// set up ISR's
 	isr_initialize();
